@@ -1,11 +1,10 @@
 from rest_framework import serializers
 from CMS.models import User,Blog,Like
 
-#Company serialziers
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields= "__all__" # include all the fields of User model
+        fields= "__all__" 
 
 
 class AuthorField(serializers.PrimaryKeyRelatedField):
@@ -21,18 +20,25 @@ class BlogSerializer(serializers.HyperlinkedModelSerializer):
     Author = AuthorField(queryset=User.objects.all(), default=1)
     class Meta:
         model = Blog
-        fields= "__all__" # include all the fields of Post model
+        fields= "__all__" 
 
     def get_likes_count(self, obj):
         return Like.objects.filter(Post_Id=obj).count()
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        if instance.is_public or instance.Author == self.context['request'].user:
+        request = self.context.get('request')
+        if request and (request.method in ('PUT', 'POST')):
+            # For PUT and POST requests, allow only the author to see the post
+            if instance.Author == request.user:
+                return data
+            else:
+                data['content'] = "This is a private post."
+                return data
+
+        if instance.is_public or instance.Author == request.user:
             return data
-    # For private posts, hide content and other details
         data['content'] = "This is a private post."
-        # You can add more fields to hide as needed
         return data
 
 class BlogField(serializers.PrimaryKeyRelatedField):
@@ -50,5 +56,5 @@ class LikeSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = Like
-        fields= "__all__" # include all the fields of Like model
+        fields= "__all__" 
 

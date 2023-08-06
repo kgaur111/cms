@@ -6,7 +6,6 @@ from rest_framework import viewsets
 from CMS.permission import IsBlogPublicOrAuthor
 from .models import User, Blog, Like
 from .serializers import UserSerializer, BlogSerializer, LikeSerializer
-# from Practical_task.settings import IsOwnerOrPublicOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,7 +13,6 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404, render
 from CMS.models import Like
 
-# Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
